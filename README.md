@@ -36,9 +36,8 @@ or double-click `start-offcourt.cmd`.
 
 ## Brand
 
-Merlot `#6A0024` · Champagne `#F2E5C6` · Midnight `#1F4173` · Olive `#435934` ·
-Ink `#2E2218`. Type: Crista (display) + Cormorant Garamond (italic accents) +
-Lato (sans).
+Merlot `#6A0024` · Chalk `#F2E5C6` · Ink `#170509` · Copper `#C9906B`.
+Type: Crista (display) + Geist (sans).
 
 The carousel runs full-colour photography with light-on-dark scrims for nav
 and captions — unlike the rest of the site, which uses a beige-everywhere

@@ -1,6 +1,6 @@
 /* ============================================================
    OFF COURT SOCIAL CLUB — carousel edition, merlot-led palette
-   Canela (display) + Geist (body/sans)
+   Crista (display, brand-approved) + Geist (body/sans)
 
    Palette follows the teaser reference: merlot/ink carry the hero,
    enroll and footer, chalk beige is reserved for the ticker band.
@@ -9,23 +9,9 @@
    ============================================================ */
 
 @font-face {
-  font-family: "Canela";
-  src: url("assets/fonts/canela-light.otf") format("opentype");
-  font-weight: 300;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Canela";
-  src: url("assets/fonts/canela-regular.otf") format("opentype");
+  font-family: "Crista";
+  src: url("assets/fonts/crista-regular.ttf") format("truetype");
   font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Canela";
-  src: url("assets/fonts/canela-bold.otf") format("opentype");
-  font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
@@ -63,7 +49,7 @@
   --champagne: var(--chalk);
   --paper: var(--chalk);
 
-  --display: "Canela", Georgia, serif;
+  --display: "Crista", Georgia, serif;
   --sans: "Geist", -apple-system, "Segoe UI", sans-serif;
 
   --radius: 18px;
@@ -140,7 +126,7 @@ h2, .ob-welcome {
   letter-spacing: 0.01em;
 }
 
-/* Canela ships without a true italic — the browser's synthesised slant
+/* Crista ships roman-only — the browser's synthesised slant
    on the same face still reads as one family, just leaning for emphasis */
 h2 em, .ob-welcome em {
   font-style: italic;
@@ -469,25 +455,13 @@ h2 em, .ob-welcome em {
   text-align: center;
 }
 
-#enroll .kicker { color: var(--chalk); opacity: 0.85; }
-
 .ob-title {
   font-family: var(--display);
   font-weight: 400;
-  font-size: clamp(30px, 6.4vw, 46px);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  line-height: 1.1;
+  font-size: clamp(32px, 6.4vw, 52px);
   color: var(--chalk);
-  margin: clamp(6px, 1.2vh, 12px) 0 clamp(6px, 1.2vh, 12px);
-  padding-left: 0.1em; /* optically recentre letterspaced caps */
-}
-
-.ob-sub {
-  font-size: clamp(13px, 1.6vw, 15px);
-  line-height: 1.55;
-  opacity: 0.85;
-  max-width: 32em;
-  margin: 0 auto clamp(16px, 2.6vh, 28px);
+  margin: 0 0 clamp(24px, 4vh, 40px);
 }
 
 #ob-form { text-align: left; }
@@ -538,6 +512,16 @@ h2 em, .ob-welcome em {
 #ob-form .btn-light {
   margin-top: clamp(4px, 1vh, 10px);
   min-height: 46px;
+}
+
+.ob-note {
+  margin-top: clamp(12px, 2vh, 18px);
+  text-align: center;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  opacity: 0.6;
 }
 
 #ob-success { padding: clamp(14px, 2.6vh, 24px) 0; }
