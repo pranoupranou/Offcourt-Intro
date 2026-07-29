@@ -1,0 +1,536 @@
+/* ============================================================
+   OFF COURT SOCIAL CLUB — carousel edition
+   Brand: Velvet Merlot / Champagne Beige / Midnight Court /
+   Olive Lawn · Crista (display) + Cormorant italic + Lato
+
+   Hero carousel shows full-colour photography (not the watermark
+   treatment used elsewhere), so nav/dots/captions run light-on-dark
+   with scrims for contrast. Enroll + footer keep the site's usual
+   beige-with-dark-footer palette.
+   ============================================================ */
+
+@font-face {
+  font-family: "Crista";
+  src: url("assets/fonts/crista-regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --merlot: #6A0024;
+  --merlot-deep: #4A0019;
+  --champagne: #F2E5C6;
+  --paper: #F2E5C6;
+  --midnight: #1F4173;
+  --olive: #435934;
+  --ink: #2E2218;
+
+  --display: "Crista", "Cormorant Garamond", Georgia, serif;
+  --serif: "Cormorant Garamond", Georgia, serif;
+  --sans: "Lato", -apple-system, "Segoe UI", sans-serif;
+
+  --radius: 18px;
+  --gutter: clamp(24px, 6.5vw, 120px);
+
+  /* spacing scale — one system, used everywhere */
+  --sp-2xs: clamp(10px, 1.2vh, 16px);
+  --sp-xs:  clamp(18px, 2.6vh, 32px);
+  --sp-sm:  clamp(28px, 4vh, 56px);
+  --sp-md:  clamp(44px, 6.5vh, 96px);
+  --sp-lg:  clamp(64px, 9.5vh, 144px);
+  --sp-xl:  clamp(88px, 13vh, 192px);
+
+  --content-max: 1680px;
+  --copy-max: 640px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+  overscroll-behavior-y: none;
+  scrollbar-gutter: stable;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+body {
+  background: var(--paper);
+  color: var(--champagne);
+  font-family: var(--sans);
+  font-weight: 400;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+::selection { background: var(--merlot); color: var(--champagne); }
+
+.grain {
+  position: fixed;
+  inset: -50%;
+  width: 200%;
+  height: 200%;
+  z-index: 70;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+  transform: translateZ(0);
+}
+
+main { position: relative; }
+
+/* ============ type ============ */
+
+.kicker {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.38em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+h2, .ob-welcome {
+  font-family: var(--display);
+  font-weight: 400;
+  line-height: 1.04;
+  letter-spacing: 0.01em;
+}
+
+h2 em, .ob-welcome em {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.br-lg { display: none; }
+@media (min-width: 768px) { .br-lg { display: inline; } }
+
+/* ============ buttons ============ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: 999px;
+  padding: 16px 36px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background-color 0.6s ease, color 0.6s ease, border-color 0.6s ease,
+    letter-spacing 0.7s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.btn:hover { letter-spacing: 0.32em; }
+
+.btn-light {
+  background: var(--merlot);
+  color: var(--champagne);
+  border-color: var(--merlot);
+  width: 100%;
+}
+.btn-light:hover { background: var(--merlot-deep); border-color: var(--merlot-deep); }
+
+/* ============ 01 · hero carousel ============ */
+
+#hero {
+  position: relative;
+  height: 100vh;
+  height: 100lvh;
+  overflow: hidden;
+  background: var(--merlot-deep);
+}
+
+.carousel {
+  position: absolute;
+  inset: 0;
+}
+
+.carousel-track {
+  display: flex;
+  height: 100%;
+  width: 400%;
+  transition: transform 0.9s cubic-bezier(0.65, 0, 0.35, 1);
+  will-change: transform;
+}
+
+.slide {
+  position: relative;
+  flex: 0 0 25%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.slide-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: translateZ(0);
+}
+
+/* per-slide framing — each photo's own point of interest kept in view */
+.slide[data-index="0"] .slide-img { object-position: center 62%; }
+.slide[data-index="1"] .slide-img { object-position: 100% 50%; }
+.slide[data-index="2"] .slide-img { object-position: center 48%; }
+.slide[data-index="3"] .slide-img { object-position: center 52%; }
+
+.slide-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(26, 4, 12, 0.78) 0%, rgba(26, 4, 12, 0.32) 32%, rgba(26, 4, 12, 0) 60%);
+  pointer-events: none;
+}
+
+.slide-copy {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  padding: 0 var(--gutter) clamp(112px, 17vh, 168px);
+  color: var(--champagne);
+  text-align: left;
+}
+
+.slide-kicker {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.36em;
+  text-transform: uppercase;
+  opacity: 0.85;
+  margin-bottom: 12px;
+  text-shadow: 0 1px 12px rgba(26, 4, 12, 0.5);
+}
+
+.slide-line {
+  font-family: var(--display);
+  font-weight: 400;
+  line-height: 1.2;
+  font-size: clamp(26px, 6vw, 44px);
+  text-shadow: 0 2px 20px rgba(26, 4, 12, 0.45);
+  max-width: 14em;
+}
+
+.slide-line em {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 500;
+}
+
+/* darkens the nav zone a touch regardless of which slide is behind it */
+.hero-topscrim {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: clamp(120px, 20vh, 220px);
+  background: linear-gradient(to bottom, rgba(26, 4, 12, 0.5), rgba(26, 4, 12, 0));
+  pointer-events: none;
+  z-index: 4;
+}
+
+.nav {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  z-index: 6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: clamp(10px, 3vw, 32px);
+  padding: clamp(18px, 3.2vw, 32px) var(--gutter);
+}
+
+.nav-mark { display: block; flex: none; }
+
+.nav-mark img {
+  display: block;
+  height: clamp(38px, 6vw, 52px);
+  width: auto;
+  transition: opacity 0.5s ease, transform 0.7s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+.nav-mark:hover img { opacity: 0.8; transform: translateY(-1px); }
+
+.nav-cta {
+  color: var(--champagne);
+  text-decoration: none;
+  font-size: clamp(9px, 2.4vw, 11px);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: clamp(9px, 2vw, 13px) clamp(12px, 3.2vw, 22px);
+  border: 1px solid rgba(242, 229, 198, 0.55);
+  border-radius: 999px;
+  white-space: nowrap;
+  transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease,
+    letter-spacing 0.7s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+.nav-cta:hover { background: var(--champagne); color: var(--merlot); border-color: var(--champagne); letter-spacing: 0.18em; }
+
+.carousel-dots {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: clamp(60px, 10vh, 96px);
+  z-index: 6;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.dot {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(242, 229, 198, 0.4);
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  transition: background-color 0.4s ease, width 0.4s ease;
+}
+
+/* generous invisible tap target without a bigger visual dot */
+.dot::after {
+  content: "";
+  position: absolute;
+  inset: -12px;
+}
+
+.dot.is-active { background: var(--champagne); width: 22px; }
+
+.scroll-cue {
+  position: absolute;
+  left: 50%;
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.cue-text {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  opacity: 0.75;
+  padding-left: 0.4em;
+  color: var(--champagne);
+}
+
+.cue-line {
+  display: block;
+  width: 1px;
+  height: 36px;
+  background: rgba(242, 229, 198, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.cue-line::after {
+  content: "";
+  position: absolute;
+  left: 0; top: -40%;
+  width: 100%;
+  height: 40%;
+  background: var(--champagne);
+  animation: cue 2.8s cubic-bezier(0.45, 0, 0.2, 1) infinite;
+}
+
+@keyframes cue {
+  0% { top: -40%; }
+  70%, 100% { top: 110%; }
+}
+
+/* ============ 02 · enroll ============ */
+
+#enroll {
+  background: var(--paper);
+  color: var(--ink);
+  padding: clamp(36px, 6vh, 64px) var(--gutter) clamp(28px, 4.5vh, 44px);
+}
+
+.ob-inner {
+  max-width: var(--copy-max);
+  margin: 0 auto;
+  text-align: center;
+}
+
+#enroll .kicker { color: var(--merlot); opacity: 0.85; }
+
+.ob-title {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(30px, 6.4vw, 46px);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--merlot);
+  margin: clamp(6px, 1.2vh, 12px) 0 clamp(6px, 1.2vh, 12px);
+  padding-left: 0.1em; /* optically recentre letterspaced caps */
+}
+
+.ob-sub {
+  font-size: clamp(13px, 1.6vw, 15px);
+  line-height: 1.55;
+  opacity: 0.85;
+  max-width: 32em;
+  margin: 0 auto clamp(16px, 2.6vh, 28px);
+}
+
+#ob-form { text-align: left; }
+
+@media (min-width: 900px) {
+  .ob-fields {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0 24px;
+    margin-bottom: clamp(14px, 2.2vh, 22px);
+  }
+  .ob-fields .field { margin-bottom: 0; }
+}
+
+.field { margin-bottom: clamp(12px, 2vh, 20px); }
+
+.field label {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.38em;
+  text-transform: uppercase;
+  opacity: 0.6;
+  color: var(--merlot);
+  margin-bottom: 3px;
+  transition: opacity 0.5s ease, letter-spacing 0.6s ease;
+}
+
+.field:focus-within label { opacity: 1; letter-spacing: 0.44em; }
+
+.field input {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid rgba(106, 0, 36, 0.3);
+  border-radius: 0;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: clamp(18px, 2.6vw, 22px);
+  font-weight: 400;
+  padding: 7px 0 9px;
+  outline: none;
+  transition: border-color 0.5s ease;
+}
+
+.field input:focus { border-bottom-color: var(--merlot); }
+
+#ob-form .btn-light {
+  margin-top: clamp(4px, 1vh, 10px);
+  min-height: 46px;
+}
+
+#ob-success { padding: clamp(14px, 2.6vh, 24px) 0; }
+
+.ob-welcome {
+  font-size: clamp(32px, 7.5vw, 60px);
+  color: var(--merlot);
+}
+
+.ob-among {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(20px, 4.2vw, 30px);
+  line-height: 1.25;
+  color: var(--merlot);
+  margin-top: clamp(10px, 1.8vh, 16px);
+}
+
+.ob-soon {
+  margin-top: clamp(10px, 1.8vh, 18px);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+/* ============ 03 · footer — the one dark section ============ */
+
+footer {
+  background: var(--merlot-deep);
+  padding: clamp(24px, 4vh, 44px) var(--gutter) clamp(16px, 2.4vh, 26px);
+  text-align: center;
+}
+
+.foot-soon {
+  font-family: var(--display);
+  font-size: clamp(20px, 4vw, 32px);
+  line-height: 1.05;
+  letter-spacing: 0.01em;
+  margin-bottom: clamp(12px, 2vh, 20px);
+}
+
+.foot-soon em {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 500;
+}
+
+.foot-logo {
+  display: block;
+  height: 28px;
+  width: auto;
+  margin: 0 auto clamp(10px, 1.6vh, 16px);
+  opacity: 0.95;
+}
+
+.foot-links {
+  display: flex;
+  justify-content: center;
+  gap: clamp(20px, 5vw, 48px);
+  flex-wrap: wrap;
+  margin-bottom: clamp(10px, 1.6vh, 16px);
+}
+
+.foot-links a {
+  color: var(--champagne);
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  opacity: 0.8;
+  padding: 12px 4px;
+  transition: opacity 0.4s ease, letter-spacing 0.7s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+.foot-links a:hover { opacity: 1; letter-spacing: 0.34em; }
+
+.foot-copy {
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  opacity: 0.45;
+}
+
+/* ============ reduced motion ============ */
+
+body.reduced .carousel-track { transition: none; }
+body.reduced .scroll-cue { display: none; }
+body.reduced #hero { height: auto; min-height: 100svh; }
