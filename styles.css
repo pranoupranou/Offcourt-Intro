@@ -2,12 +2,10 @@
    OFF COURT SOCIAL CLUB — carousel edition, merlot-led palette
    Canela (display) + Geist (body/sans)
 
-   Palette follows the teaser reference: merlot holds its chroma
-   through most of the page (ticker, footer run dark), chalk beige
-   is held back for the one warm, inviting moment — the enroll
-   section — same discipline the reference uses for its own "join"
-   panel. Copper is reserved for a single accent: the scroll-cue
-   sweep, mirroring the reference's own hour-marker treatment.
+   Palette follows the teaser reference: merlot/ink carry the hero,
+   enroll and footer, chalk beige is reserved for the ticker band.
+   Copper is a single accent: the scroll-cue sweep and the enroll
+   field focus state.
    ============================================================ */
 
 @font-face {
@@ -177,12 +175,12 @@ h2 em, .ob-welcome em {
 .btn:hover { letter-spacing: 0.32em; }
 
 .btn-light {
-  background: var(--merlot);
-  color: var(--chalk);
-  border-color: var(--merlot);
+  background: var(--chalk);
+  color: var(--merlot);
+  border-color: var(--chalk);
   width: 100%;
 }
-.btn-light:hover { background: var(--merlot-deep); border-color: var(--merlot-deep); }
+.btn-light:hover { background: var(--copper-lift); border-color: var(--copper-lift); }
 
 /* ============ 01 · hero carousel ============ */
 
@@ -403,8 +401,8 @@ h2 em, .ob-welcome em {
 /* ============ 02 · ticker ============ */
 
 #amenities {
-  background: var(--merlot);
-  color: var(--chalk);
+  background: var(--chalk);
+  color: var(--merlot);
   padding: clamp(26px, 4.2vh, 44px) 0;
   position: relative;
   z-index: 3;
@@ -441,7 +439,7 @@ h2 em, .ob-welcome em {
   line-height: 1.2;
   letter-spacing: 0.01em;
   font-size: clamp(20px, 2.2vw, 30px);
-  color: var(--chalk);
+  color: var(--merlot);
   white-space: nowrap;
 }
 
@@ -457,11 +455,11 @@ h2 em, .ob-welcome em {
   border: 0;
 }
 
-/* ============ 03 · enroll — the one light, warm moment ============ */
+/* ============ 03 · enroll — merlot, the reference's warm dark moment ============ */
 
 #enroll {
-  background: var(--chalk);
-  color: var(--ink);
+  background: var(--merlot);
+  color: var(--chalk);
   padding: clamp(36px, 6vh, 64px) var(--gutter) clamp(28px, 4.5vh, 44px);
 }
 
@@ -471,7 +469,7 @@ h2 em, .ob-welcome em {
   text-align: center;
 }
 
-#enroll .kicker { color: var(--merlot); opacity: 0.85; }
+#enroll .kicker { color: var(--chalk); opacity: 0.85; }
 
 .ob-title {
   font-family: var(--display);
@@ -479,7 +477,7 @@ h2 em, .ob-welcome em {
   font-size: clamp(30px, 6.4vw, 46px);
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--merlot);
+  color: var(--chalk);
   margin: clamp(6px, 1.2vh, 12px) 0 clamp(6px, 1.2vh, 12px);
   padding-left: 0.1em; /* optically recentre letterspaced caps */
 }
@@ -513,7 +511,7 @@ h2 em, .ob-welcome em {
   letter-spacing: 0.38em;
   text-transform: uppercase;
   opacity: 0.6;
-  color: var(--merlot);
+  color: var(--chalk);
   margin-bottom: 3px;
   transition: opacity 0.5s ease, letter-spacing 0.6s ease;
 }
@@ -524,9 +522,9 @@ h2 em, .ob-welcome em {
   width: 100%;
   background: transparent;
   border: 0;
-  border-bottom: 1px solid rgba(106, 0, 36, 0.3);
+  border-bottom: 1px solid var(--chalk-45);
   border-radius: 0;
-  color: var(--ink);
+  color: var(--chalk);
   font-family: var(--display);
   font-size: clamp(18px, 2.6vw, 22px);
   font-weight: 400;
@@ -535,7 +533,7 @@ h2 em, .ob-welcome em {
   transition: border-color 0.5s ease;
 }
 
-.field input:focus { border-bottom-color: var(--merlot); }
+.field input:focus { border-bottom-color: var(--copper); }
 
 #ob-form .btn-light {
   margin-top: clamp(4px, 1vh, 10px);
@@ -546,7 +544,7 @@ h2 em, .ob-welcome em {
 
 .ob-welcome {
   font-size: clamp(32px, 7.5vw, 60px);
-  color: var(--merlot);
+  color: var(--chalk);
 }
 
 .ob-among {
@@ -555,7 +553,7 @@ h2 em, .ob-welcome em {
   font-weight: 400;
   font-size: clamp(20px, 4.2vw, 30px);
   line-height: 1.25;
-  color: var(--merlot);
+  color: var(--chalk);
   margin-top: clamp(10px, 1.8vh, 16px);
 }
 

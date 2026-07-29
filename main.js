@@ -17,7 +17,7 @@
   var total = slides.length;
   var current = 0;
   var autoplayTimer = null;
-  var AUTOPLAY_MS = 6500;
+  var AUTOPLAY_MS = 4000;
 
   function render() {
     track.style.transform = "translateX(-" + (current * (100 / total)) + "%)";
