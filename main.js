@@ -116,6 +116,15 @@
     revealCaption(current);
   };
 
+  /* ============ ticker ============ */
+
+  gsap.from(".am-ticker", {
+    autoAlpha: 0,
+    y: 20,
+    duration: 1.3,
+    scrollTrigger: { trigger: "#amenities", start: "top 82%", once: true }
+  });
+
   /* ============ enroll ============ */
 
   gsap.utils.toArray(".ob-el").forEach(function (el, i) {
