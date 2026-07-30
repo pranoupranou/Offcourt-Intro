@@ -7,6 +7,77 @@
 
   var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+  /* ============ ticker — clone the item set until the track is always
+     at least 2x the viewport wide, so the -50% loop never runs dry ============ */
+
+  (function () {
+    var track = document.getElementById("amTrack");
+    if (!track) return;
+    var base = track.innerHTML;
+
+    function fill() {
+      track.innerHTML = base;
+      var guard = 0;
+      while (track.scrollWidth < window.innerWidth * 2 && guard < 25) {
+        track.innerHTML += base;
+        guard++;
+      }
+      track.innerHTML += track.innerHTML; /* mirror once more for the seamless -50% loop */
+    }
+
+    fill();
+
+    var resizeTimer = null;
+    window.addEventListener("resize", function () {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(fill, 200);
+    });
+  })();
+
+  /* ============ background music — attempts autoplay, falls back to
+     starting on first user gesture if the browser blocks it ============ */
+
+  (function () {
+    var audio = document.getElementById("bgMusic");
+    var toggle = document.getElementById("musicToggle");
+    if (!audio || !toggle) return;
+
+    function reflect() {
+      var muted = audio.muted || audio.paused;
+      toggle.setAttribute("aria-pressed", muted ? "true" : "false");
+      toggle.setAttribute("aria-label", muted ? "Play music" : "Mute music");
+    }
+
+    function tryPlay() {
+      var p = audio.play();
+      if (p && p.catch) p.catch(function () { /* blocked until a gesture arrives */ });
+    }
+
+    tryPlay();
+    audio.addEventListener("play", reflect);
+    audio.addEventListener("pause", reflect);
+    audio.addEventListener("volumechange", reflect);
+    reflect();
+
+    function primeOnGesture() {
+      if (!audio.paused) return;
+      tryPlay();
+    }
+    ["pointerdown", "keydown", "touchstart"].forEach(function (evt) {
+      document.addEventListener(evt, primeOnGesture, { once: true, passive: true });
+    });
+
+    toggle.addEventListener("click", function () {
+      if (audio.paused) {
+        audio.muted = false;
+        tryPlay();
+      } else {
+        audio.muted = !audio.muted;
+        reflect();
+      }
+    });
+  })();
+
   /* ============ hero carousel — runs regardless of motion prefs;
      reduced motion just removes the slide transition + autoplay ============ */
 

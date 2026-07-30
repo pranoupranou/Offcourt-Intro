@@ -230,7 +230,7 @@ h2 em, .ob-welcome em {
   right: 0;
   bottom: 0;
   z-index: 2;
-  padding: 0 var(--gutter) clamp(126px, 19vh, 176px);
+  padding: 0 var(--gutter) clamp(220px, 31vh, 280px);
   color: var(--chalk);
   text-align: left;
 }
@@ -246,19 +246,13 @@ h2 em, .ob-welcome em {
   text-shadow: 0 1px 12px rgba(23, 5, 9, 0.55);
 }
 
-.kicker-loc {
-  font-weight: 400;
-  letter-spacing: 0.16em;
-  opacity: 0.65;
-}
-
 .slide-line {
   font-family: var(--display);
   font-weight: 400;
-  line-height: 1.08;
-  font-size: clamp(32px, 8.5vw, 64px);
+  line-height: 1.04;
+  font-size: clamp(36px, 10.5vw, 132px);
   text-shadow: 0 2px 20px rgba(23, 5, 9, 0.5);
-  max-width: 14em;
+  max-width: 18em;
 }
 
 .slide-line em {
@@ -289,6 +283,12 @@ h2 em, .ob-welcome em {
 
 .nav-mark { display: block; flex: none; }
 
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: clamp(8px, 2vw, 14px);
+}
+
 .nav-mark img {
   display: block;
   height: clamp(38px, 6vw, 52px);
@@ -296,6 +296,28 @@ h2 em, .ob-welcome em {
   transition: opacity 0.5s ease, transform 0.7s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 .nav-mark:hover img { opacity: 0.8; transform: translateY(-1px); }
+
+.music-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(34px, 6vw, 40px);
+  height: clamp(34px, 6vw, 40px);
+  flex: none;
+  color: var(--chalk);
+  background: transparent;
+  border: 1px solid var(--chalk-45);
+  border-radius: 999px;
+  padding: 0;
+  cursor: pointer;
+  transition: background-color 0.5s ease, border-color 0.5s ease;
+}
+.music-toggle:hover { background: var(--chalk-10); border-color: var(--chalk-70); }
+
+.music-icon { width: 17px; height: 17px; }
+.music-icon .music-mute { opacity: 0; }
+.music-toggle[aria-pressed="true"] .music-wave { opacity: 0; }
+.music-toggle[aria-pressed="true"] .music-mute { opacity: 1; }
 
 .nav-cta {
   color: var(--chalk);
@@ -416,7 +438,7 @@ h2 em, .ob-welcome em {
   display: flex;
   align-items: center;
   width: max-content;
-  gap: clamp(28px, 4vw, 56px);
+  gap: clamp(20px, 3vw, 40px);
   animation: am-ticker-scroll 30s linear infinite;
 }
 
@@ -437,6 +459,12 @@ h2 em, .ob-welcome em {
   font-size: clamp(20px, 2.2vw, 30px);
   color: var(--merlot);
   white-space: nowrap;
+}
+
+.am-dot {
+  font-size: clamp(20px, 2.2vw, 30px);
+  color: var(--merlot);
+  opacity: 0.4;
 }
 
 .visually-hidden {
@@ -587,15 +615,6 @@ footer {
   width: auto;
   margin: 0 auto clamp(8px, 1.2vh, 12px);
   opacity: 0.95;
-}
-
-.foot-loc {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.32em;
-  text-transform: uppercase;
-  color: var(--copper-lift);
-  margin-bottom: clamp(16px, 2.4vh, 24px);
 }
 
 .foot-links {
