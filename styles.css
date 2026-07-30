@@ -1,6 +1,6 @@
 /* ============================================================
    OFF COURT SOCIAL CLUB — carousel edition, merlot-led palette
-   Crista (display, brand-approved) + Geist (body/sans)
+   PP Editorial New (display) + Geist (body/sans)
 
    Palette follows the teaser reference: merlot/ink carry the hero,
    enroll and footer, chalk beige is reserved for the ticker band.
@@ -9,10 +9,17 @@
    ============================================================ */
 
 @font-face {
-  font-family: "Crista";
-  src: url("assets/fonts/crista-regular.ttf") format("truetype");
+  font-family: "Editorial New";
+  src: url("assets/fonts/editorial-new-regular.otf") format("opentype");
   font-weight: 400;
   font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Editorial New";
+  src: url("assets/fonts/editorial-new-italic.otf") format("opentype");
+  font-weight: 400;
+  font-style: italic;
   font-display: swap;
 }
 @font-face {
@@ -49,7 +56,7 @@
   --champagne: var(--chalk);
   --paper: var(--chalk);
 
-  --display: "Crista", Georgia, serif;
+  --display: "Editorial New", Georgia, serif;
   --sans: "Geist", -apple-system, "Segoe UI", sans-serif;
 
   --radius: 18px;
@@ -88,7 +95,6 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  overflow-x: hidden;
 }
 
 ::selection { background: var(--merlot); color: var(--chalk); }
@@ -126,8 +132,6 @@ h2, .ob-welcome {
   letter-spacing: 0.01em;
 }
 
-/* Crista ships roman-only — the browser's synthesised slant
-   on the same face still reads as one family, just leaning for emphasis */
 h2 em, .ob-welcome em {
   font-style: italic;
   font-weight: 400;
@@ -226,7 +230,7 @@ h2 em, .ob-welcome em {
   right: 0;
   bottom: 0;
   z-index: 2;
-  padding: 0 var(--gutter) clamp(112px, 17vh, 168px);
+  padding: 0 var(--gutter) clamp(126px, 19vh, 176px);
   color: var(--chalk);
   text-align: left;
 }
@@ -238,15 +242,21 @@ h2 em, .ob-welcome em {
   letter-spacing: 0.36em;
   text-transform: uppercase;
   opacity: 0.85;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
   text-shadow: 0 1px 12px rgba(23, 5, 9, 0.55);
+}
+
+.kicker-loc {
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  opacity: 0.65;
 }
 
 .slide-line {
   font-family: var(--display);
   font-weight: 400;
-  line-height: 1.2;
-  font-size: clamp(26px, 6vw, 44px);
+  line-height: 1.08;
+  font-size: clamp(32px, 8.5vw, 64px);
   text-shadow: 0 2px 20px rgba(23, 5, 9, 0.5);
   max-width: 14em;
 }
@@ -307,7 +317,7 @@ h2 em, .ob-welcome em {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: clamp(60px, 10vh, 96px);
+  bottom: clamp(92px, 13vh, 116px);
   z-index: 6;
   display: flex;
   justify-content: center;
@@ -575,8 +585,17 @@ footer {
   display: block;
   height: 28px;
   width: auto;
-  margin: 0 auto clamp(10px, 1.6vh, 16px);
+  margin: 0 auto clamp(8px, 1.2vh, 12px);
   opacity: 0.95;
+}
+
+.foot-loc {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--copper-lift);
+  margin-bottom: clamp(16px, 2.4vh, 24px);
 }
 
 .foot-links {
