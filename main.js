@@ -78,81 +78,54 @@
     });
   })();
 
-  /* ============ hero carousel — runs regardless of motion prefs;
-     reduced motion just removes the slide transition + autoplay ============ */
+  /* ============ hero video — buffer, fade in, then scrub with scroll
+     while the hero is pinned ============ */
 
-  var track = document.getElementById("carouselTrack");
-  var carousel = document.getElementById("carousel");
-  var slides = Array.prototype.slice.call(document.querySelectorAll(".slide"));
-  var dots = Array.prototype.slice.call(document.querySelectorAll(".dot"));
-  var total = slides.length;
-  var current = 0;
-  var autoplayTimer = null;
-  var AUTOPLAY_MS = 4000;
+  var video = document.getElementById("film");
+  var FILM_SRC = "assets/launch-hero.mp4";
+  var filmDuration = 0;
+  var targetTime = 0;
+  var smoothTime = 0;
+  var firstFrameShown = false;
+  var isTouch = window.matchMedia("(pointer: coarse)").matches;
 
-  function render() {
-    track.style.transform = "translateX(-" + (current * (100 / total)) + "%)";
-    slides.forEach(function (s, i) { s.classList.toggle("is-active", i === current); });
-    dots.forEach(function (d, i) {
-      d.classList.toggle("is-active", i === current);
-      d.setAttribute("aria-selected", i === current ? "true" : "false");
-    });
-  }
+  if (video) {
+    fetch(FILM_SRC)
+      .then(function (r) { return r.ok ? r.blob() : Promise.reject(new Error(r.status)); })
+      .then(function (blob) { video.src = URL.createObjectURL(blob); video.load(); })
+      .catch(function () { video.src = FILM_SRC; video.load(); });
 
-  function goTo(index) {
-    current = ((index % total) + total) % total;
-    render();
-  }
-
-  function next() { goTo(current + 1); }
-
-  function stopAutoplay() {
-    if (autoplayTimer) { clearInterval(autoplayTimer); autoplayTimer = null; }
-  }
-
-  function startAutoplay() {
-    if (reduced) return;
-    stopAutoplay();
-    autoplayTimer = setInterval(next, AUTOPLAY_MS);
-  }
-
-  dots.forEach(function (d) {
-    d.addEventListener("click", function () {
-      stopAutoplay(); /* manual control from here on — respect it */
-      goTo(parseInt(d.getAttribute("data-goto"), 10));
-    });
-  });
-
-  /* swipe: horizontal drags advance/retreat; vertical drags still scroll */
-  var startX = 0, startY = 0, dragging = false, horizontal = false;
-
-  if (carousel) {
-    carousel.addEventListener("touchstart", function (e) {
-      var t = e.touches[0];
-      startX = t.clientX; startY = t.clientY;
-      dragging = true; horizontal = false;
-    }, { passive: true });
-
-    carousel.addEventListener("touchmove", function (e) {
-      if (!dragging) return;
-      var t = e.touches[0];
-      if (Math.abs(t.clientX - startX) > Math.abs(t.clientY - startY)) horizontal = true;
-    }, { passive: true });
-
-    carousel.addEventListener("touchend", function (e) {
-      if (!dragging) return;
-      dragging = false;
-      var t = e.changedTouches[0];
-      var dx = t.clientX - startX;
-      if (horizontal && Math.abs(dx) > 40) {
-        stopAutoplay();
-        if (dx < 0) next(); else goTo(current - 1);
+    video.addEventListener("loadedmetadata", function () {
+      if (video.duration && isFinite(video.duration)) {
+        filmDuration = video.duration;
+        if (typeof ScrollTrigger !== "undefined") ScrollTrigger.refresh();
       }
     });
-  }
 
-  render();
-  startAutoplay();
+    function revealFilm() {
+      if (firstFrameShown) return;
+      firstFrameShown = true;
+      gsap.to(video, { opacity: 1, duration: 0.8, ease: "power1.out" });
+    }
+
+    if ("requestVideoFrameCallback" in HTMLVideoElement.prototype) {
+      video.requestVideoFrameCallback(function () { revealFilm(); });
+    }
+    video.addEventListener("loadeddata", function () {
+      setTimeout(revealFilm, 900);
+    }, { once: true });
+
+    if (isTouch) {
+      window.addEventListener("touchstart", function () {
+        if (firstFrameShown) return;
+        var p = video.play();
+        if (p && p.then) {
+          p.then(function () { video.pause(); try { video.currentTime = 0.01; } catch (e) {} })
+            .catch(function () {});
+        }
+      }, { once: true, passive: true });
+    }
+  }
 
   /* ---------- reduced motion / no GSAP: skip the rest ---------- */
   if (reduced || typeof gsap === "undefined") {
@@ -166,26 +139,54 @@
 
   /* ============ hero chrome entrance ============ */
 
-  gsap.set([".nav", ".carousel-dots", ".scroll-cue", ".slide.is-active .slide-copy"], { autoAlpha: 0, y: 18 });
-  gsap.to(".nav", { autoAlpha: 1, y: 0, duration: 1.4, delay: 0.2 });
-  gsap.to(".slide.is-active .slide-copy", { autoAlpha: 1, y: 0, duration: 1.5, delay: 0.5 });
-  gsap.to(".carousel-dots", { autoAlpha: 1, y: 0, duration: 1.2, delay: 0.9 });
-  gsap.to(".scroll-cue", { autoAlpha: 1, y: 0, duration: 1.2, delay: 1.0 });
+  var heroBlocks = gsap.utils.toArray(".hero-copy-block");
+  var n = heroBlocks.length;
 
-  /* each slide's own caption fades up the first time it becomes active */
-  var revealed = {};
-  function revealCaption(index) {
-    if (revealed[index]) return;
-    revealed[index] = true;
-    var copy = slides[index].querySelector(".slide-copy");
-    gsap.fromTo(copy, { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: 0.9, delay: 0.25, ease: "power2.out" });
+  gsap.set(heroBlocks, { autoAlpha: 0, y: 18 });
+  gsap.set([".nav", ".scroll-cue"], { autoAlpha: 0, y: 18 });
+  gsap.to(".nav", { autoAlpha: 1, y: 0, duration: 1.4, delay: 0.2 });
+  gsap.to(".scroll-cue", { autoAlpha: 1, y: 0, duration: 1.2, delay: 0.9 });
+  gsap.to(heroBlocks[0], { autoAlpha: 1, y: 0, duration: 1.4, delay: 0.5 });
+
+  /* ============ hero pin — scroll drives both the video scrub and
+     which of the 4 captions is showing ============ */
+
+  var heroTl = gsap.timeline({
+    scrollTrigger: {
+      trigger: "#hero",
+      start: "top top",
+      end: "+=320%",
+      pin: true,
+      scrub: 1,
+      anticipatePin: 1,
+      onUpdate: function (self) {
+        if (!video) return;
+        var p = Math.min(self.progress / 0.92, 1);
+        targetTime = p * (filmDuration ? filmDuration - 0.05 : 0);
+      }
+    }
+  });
+
+  var transitions = n - 1;
+  var stageDur = 10 / transitions;
+  for (var i = 1; i < n; i++) {
+    var start = (i - 1) * stageDur;
+    heroTl.to(heroBlocks[i - 1], { autoAlpha: 0, y: -22, duration: stageDur * 0.4, ease: "power2.in" }, start);
+    heroTl.to(heroBlocks[i], { autoAlpha: 1, y: 0, duration: stageDur * 0.4, ease: "power2.out" }, start + stageDur * 0.15);
   }
-  revealed[0] = true; /* handled by the entrance tween above */
-  var _goTo = goTo;
-  goTo = function (index) {
-    _goTo(index);
-    revealCaption(current);
-  };
+  heroTl.to(heroBlocks[n - 1], { autoAlpha: 0, y: -22, duration: stageDur * 0.4, ease: "power2.in" }, 10 - stageDur * 0.4);
+  heroTl.to(".scroll-cue", { autoAlpha: 0, duration: 0.5 }, 0.4);
+
+  if (video) {
+    video.addEventListener("seeked", function () {});
+    gsap.ticker.add(function () {
+      if (!filmDuration || video.readyState < 2) return;
+      smoothTime += (targetTime - smoothTime) * 0.12;
+      var diff = Math.abs(smoothTime - video.currentTime);
+      var seekEps = isTouch ? 0.04 : 0.02;
+      if (diff > seekEps) video.currentTime = smoothTime;
+    });
+  }
 
   /* ============ ticker ============ */
 

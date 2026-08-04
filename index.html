@@ -17,51 +17,14 @@
 
 <main>
 
-  <!-- ============ 01 · HERO CAROUSEL ============ -->
+  <!-- ============ 01 · HERO VIDEO ============ -->
   <section id="hero">
-    <div class="carousel" id="carousel">
-      <div class="carousel-track" id="carouselTrack">
-
-        <figure class="slide is-active" data-index="0">
-          <img class="slide-img" src="assets/community.jpg" alt="Members gathered for an evening film screening on the lawn with their dog" width="1800" height="1005" fetchpriority="high" decoding="async">
-          <div class="slide-scrim" aria-hidden="true"></div>
-          <div class="slide-copy">
-            <p class="slide-kicker">Community</p>
-            <p class="slide-line">Come as you are.<br><em>Find your people.</em></p>
-          </div>
-        </figure>
-
-        <figure class="slide" data-index="1">
-          <img class="slide-img" src="assets/sport.jpg" alt="Two members playing padel at sunset" width="1800" height="1005" loading="lazy" decoding="async">
-          <div class="slide-scrim" aria-hidden="true"></div>
-          <div class="slide-copy">
-            <p class="slide-kicker">Sport</p>
-            <p class="slide-line">You came to play.<br><em>You stayed.</em></p>
-          </div>
-        </figure>
-
-        <figure class="slide" data-index="2">
-          <img class="slide-img" src="assets/recovery.jpg" alt="A member relaxing beside the spa pool as another practises yoga outdoors" width="1800" height="1012" loading="lazy" decoding="async">
-          <div class="slide-scrim" aria-hidden="true"></div>
-          <div class="slide-copy">
-            <p class="slide-kicker">Recovery</p>
-            <p class="slide-line">Train hard.<br><em>Recover harder.</em></p>
-          </div>
-        </figure>
-
-        <figure class="slide" data-index="3">
-          <img class="slide-img" src="assets/fnb.jpg" alt="Members having breakfast in the café overlooking the padel courts" width="1800" height="1005" loading="lazy" decoding="async">
-          <div class="slide-scrim" aria-hidden="true"></div>
-          <div class="slide-copy">
-            <p class="slide-kicker">Food &amp; Drinks</p>
-            <p class="slide-line">Off the court.<br><em>Around the table.</em></p>
-          </div>
-        </figure>
-
-      </div>
+    <div class="film-wrap" aria-hidden="true">
+      <video id="film" muted playsinline webkit-playsinline preload="metadata" disablepictureinpicture disableremoteplayback tabindex="-1"></video>
     </div>
-
-    <div class="hero-topscrim" aria-hidden="true"></div>
+    <div class="hero-scrim" aria-hidden="true"></div>
+    <div class="hero-haze" aria-hidden="true"></div>
+    <div class="hero-exit" aria-hidden="true"></div>
 
     <header class="nav">
       <a class="nav-mark" href="#hero"><img src="assets/logo.png" alt="Off Court Social Club" width="331" height="104"></a>
@@ -79,14 +42,26 @@
     </header>
     <audio id="bgMusic" src="assets/audio/courtside-brunch.mp3" loop preload="auto"></audio>
 
-    <div class="carousel-dots" id="carouselDots" aria-label="Choose a slide">
-      <button class="dot is-active" type="button" data-goto="0" aria-label="Community" aria-selected="true"></button>
-      <button class="dot" type="button" data-goto="1" aria-label="Sport" aria-selected="false"></button>
-      <button class="dot" type="button" data-goto="2" aria-label="Recovery" aria-selected="false"></button>
-      <button class="dot" type="button" data-goto="3" aria-label="Food &amp; Drinks" aria-selected="false"></button>
+    <div class="hero-copy">
+      <div class="hero-el hero-copy-block">
+        <p class="hero-kicker">Community</p>
+        <p class="hero-line">Built around belonging.</p>
+      </div>
+      <div class="hero-el hero-copy-block">
+        <p class="hero-kicker">Sport</p>
+        <p class="hero-line">You came to play. You stayed.</p>
+      </div>
+      <div class="hero-el hero-copy-block">
+        <p class="hero-kicker">Recovery</p>
+        <p class="hero-line">Train hard. Recover harder.</p>
+      </div>
+      <div class="hero-el hero-copy-block">
+        <p class="hero-kicker">Food &amp; Drinks</p>
+        <p class="hero-line">Off the court. Around the table.</p>
+      </div>
     </div>
 
-    <div class="scroll-cue" aria-hidden="true">
+    <div class="scroll-cue hero-el" aria-hidden="true">
       <span class="cue-text">Scroll</span>
       <span class="cue-line"></span>
     </div>
