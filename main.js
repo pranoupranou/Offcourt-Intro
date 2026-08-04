@@ -141,8 +141,6 @@
 
   var heroBlocks = gsap.utils.toArray(".hero-copy-block");
   var n = heroBlocks.length;
-  /* each block's own peak position along the scroll (0 = top of pin, 1 = end) */
-  var centers = heroBlocks.map(function (_, i) { return n > 1 ? i / (n - 1) : 0; });
 
   gsap.set(heroBlocks, { autoAlpha: 1, opacity: 0 });
   gsap.set([".hero-copy", ".nav", ".scroll-cue"], { autoAlpha: 0, y: 18 });
@@ -150,34 +148,28 @@
   gsap.to(".scroll-cue", { autoAlpha: 1, y: 0, duration: 1.2, delay: 0.9 });
   gsap.to(".hero-copy", { autoAlpha: 1, y: 0, duration: 1.4, delay: 0.5 });
 
-  /* deterministic crossfade — each block's opacity is a pure function of
-     scroll progress (a linear tent centred on its own point), so the
-     visible caption always matches the scroll position exactly, in both
-     directions, with no dependency on animation history or scrub lag */
+  /* deterministic hard cut — each block owns an equal, non-overlapping
+     slice of scroll progress, so exactly one caption is ever visible at
+     a time (no crossfade blending), and the active caption is a pure
+     function of scroll position — always correct in both directions */
+  var activeIndex = -1;
   function updateCaptions(p) {
+    var idx = Math.min(n - 1, Math.floor(p * n));
+    if (idx === activeIndex) return;
+    activeIndex = idx;
     heroBlocks.forEach(function (block, i) {
-      var c = centers[i];
-      var d = p - c;
-      var w;
-      if (d >= 0) {
-        var gapRight = i < n - 1 ? centers[i + 1] - c : null;
-        w = gapRight ? 1 - Math.min(1, d / gapRight) : 1;
-      } else {
-        var gapLeft = i > 0 ? c - centers[i - 1] : null;
-        w = gapLeft ? 1 - Math.min(1, -d / gapLeft) : 1;
-      }
-      block.style.opacity = Math.max(0, Math.min(1, w));
+      block.style.opacity = i === idx ? 1 : 0;
     });
   }
   updateCaptions(0);
 
   /* ============ hero pin — scroll drives both the video scrub and
-     which of the 4 captions is showing ============ */
+     which of the 5 captions is showing ============ */
 
   ScrollTrigger.create({
     trigger: "#hero",
     start: "top top",
-    end: "+=320%",
+    end: "+=400%",
     pin: true,
     scrub: 1,
     anticipatePin: 1,
