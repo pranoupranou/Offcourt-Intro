@@ -344,7 +344,7 @@ h2 em, .ob-welcome em {
   font-family: var(--display);
   font-weight: 400;
   line-height: 1.04;
-  font-size: clamp(36px, 10.5vw, 132px);
+  font-size: clamp(18px, 5.25vw, 66px);
   text-shadow: 0 2px 20px rgba(23, 5, 9, 0.5);
   max-width: 18em;
   color: var(--chalk);
