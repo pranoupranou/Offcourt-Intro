@@ -141,41 +141,55 @@
 
   var heroBlocks = gsap.utils.toArray(".hero-copy-block");
   var n = heroBlocks.length;
+  /* each block's own peak position along the scroll (0 = top of pin, 1 = end) */
+  var centers = heroBlocks.map(function (_, i) { return n > 1 ? i / (n - 1) : 0; });
 
-  gsap.set(heroBlocks, { autoAlpha: 0, y: 18 });
-  gsap.set([".nav", ".scroll-cue"], { autoAlpha: 0, y: 18 });
+  gsap.set(heroBlocks, { autoAlpha: 1, opacity: 0 });
+  gsap.set([".hero-copy", ".nav", ".scroll-cue"], { autoAlpha: 0, y: 18 });
   gsap.to(".nav", { autoAlpha: 1, y: 0, duration: 1.4, delay: 0.2 });
   gsap.to(".scroll-cue", { autoAlpha: 1, y: 0, duration: 1.2, delay: 0.9 });
-  gsap.to(heroBlocks[0], { autoAlpha: 1, y: 0, duration: 1.4, delay: 0.5 });
+  gsap.to(".hero-copy", { autoAlpha: 1, y: 0, duration: 1.4, delay: 0.5 });
+
+  /* deterministic crossfade — each block's opacity is a pure function of
+     scroll progress (a linear tent centred on its own point), so the
+     visible caption always matches the scroll position exactly, in both
+     directions, with no dependency on animation history or scrub lag */
+  function updateCaptions(p) {
+    heroBlocks.forEach(function (block, i) {
+      var c = centers[i];
+      var d = p - c;
+      var w;
+      if (d >= 0) {
+        var gapRight = i < n - 1 ? centers[i + 1] - c : null;
+        w = gapRight ? 1 - Math.min(1, d / gapRight) : 1;
+      } else {
+        var gapLeft = i > 0 ? c - centers[i - 1] : null;
+        w = gapLeft ? 1 - Math.min(1, -d / gapLeft) : 1;
+      }
+      block.style.opacity = Math.max(0, Math.min(1, w));
+    });
+  }
+  updateCaptions(0);
 
   /* ============ hero pin — scroll drives both the video scrub and
      which of the 4 captions is showing ============ */
 
-  var heroTl = gsap.timeline({
-    scrollTrigger: {
-      trigger: "#hero",
-      start: "top top",
-      end: "+=320%",
-      pin: true,
-      scrub: 1,
-      anticipatePin: 1,
-      onUpdate: function (self) {
-        if (!video) return;
-        var p = Math.min(self.progress / 0.92, 1);
-        targetTime = p * (filmDuration ? filmDuration - 0.05 : 0);
+  ScrollTrigger.create({
+    trigger: "#hero",
+    start: "top top",
+    end: "+=320%",
+    pin: true,
+    scrub: 1,
+    anticipatePin: 1,
+    onUpdate: function (self) {
+      if (video) {
+        var pv = Math.min(self.progress / 0.92, 1);
+        targetTime = pv * (filmDuration ? filmDuration - 0.05 : 0);
       }
+      updateCaptions(self.progress);
+      if (self.progress > 0.03) gsap.set(".scroll-cue", { autoAlpha: 0 });
     }
   });
-
-  var transitions = n - 1;
-  var stageDur = 10 / transitions;
-  for (var i = 1; i < n; i++) {
-    var start = (i - 1) * stageDur;
-    heroTl.to(heroBlocks[i - 1], { autoAlpha: 0, y: -22, duration: stageDur * 0.4, ease: "power2.in" }, start);
-    heroTl.to(heroBlocks[i], { autoAlpha: 1, y: 0, duration: stageDur * 0.4, ease: "power2.out" }, start + stageDur * 0.15);
-  }
-  heroTl.to(heroBlocks[n - 1], { autoAlpha: 0, y: -22, duration: stageDur * 0.4, ease: "power2.in" }, 10 - stageDur * 0.4);
-  heroTl.to(".scroll-cue", { autoAlpha: 0, duration: 0.5 }, 0.4);
 
   if (video) {
     video.addEventListener("seeked", function () {});
