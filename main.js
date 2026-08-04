@@ -148,13 +148,28 @@
   gsap.to(".scroll-cue", { autoAlpha: 1, y: 0, duration: 1.2, delay: 0.9 });
   gsap.to(".hero-copy", { autoAlpha: 1, y: 0, duration: 1.4, delay: 0.5 });
 
-  /* deterministic hard cut — each block owns an equal, non-overlapping
-     slice of scroll progress, so exactly one caption is ever visible at
-     a time (no crossfade blending), and the active caption is a pure
-     function of scroll position — always correct in both directions */
+  /* deterministic hard cut, synced to what's actually on screen in the
+     film: gate/arrival, then the rooftop lawn, the dining room, the
+     hallway leading back outside, and finally the courts through to
+     the end. Each caption owns the scroll range that corresponds to
+     its moment in the film — no crossfade blending, exactly one
+     caption visible at a time, always correct in both directions. */
+  var CAPTION_FILM_TIMES = [0, 1.0, 1.55, 2.05, 2.65];
+
+  function captionBreakpoints() {
+    var d = filmDuration || 5.085;
+    return CAPTION_FILM_TIMES.map(function (t) {
+      return Math.min(0.999, 0.92 * t / (d - 0.05));
+    });
+  }
+
   var activeIndex = -1;
   function updateCaptions(p) {
-    var idx = Math.min(n - 1, Math.floor(p * n));
+    var bp = captionBreakpoints();
+    var idx = 0;
+    for (var i = bp.length - 1; i >= 0; i--) {
+      if (p >= bp[i]) { idx = i; break; }
+    }
     if (idx === activeIndex) return;
     activeIndex = idx;
     heroBlocks.forEach(function (block, i) {
