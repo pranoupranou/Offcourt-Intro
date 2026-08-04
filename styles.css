@@ -558,27 +558,11 @@ h2 em, .ob-welcome em {
 #ob-success { padding: clamp(14px, 2.6vh, 24px) 0; }
 
 .ob-welcome {
-  font-size: clamp(32px, 7.5vw, 60px);
+  font-size: clamp(28px, 5.6vw, 44px);
+  line-height: 1.15;
   color: var(--chalk);
-}
-
-.ob-among {
-  font-family: var(--display);
-  font-style: italic;
-  font-weight: 400;
-  font-size: clamp(20px, 4.2vw, 30px);
-  line-height: 1.25;
-  color: var(--chalk);
-  margin-top: clamp(10px, 1.8vh, 16px);
-}
-
-.ob-soon {
-  margin-top: clamp(10px, 1.8vh, 18px);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  opacity: 0.7;
+  max-width: 14em;
+  margin: 0 auto;
 }
 
 /* ============ 04 · footer — deepest note, ink not merlot ============ */
