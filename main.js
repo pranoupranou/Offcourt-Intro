@@ -82,7 +82,7 @@
      while the hero is pinned ============ */
 
   var video = document.getElementById("film");
-  var FILM_SRC = "assets/launch-hero.mp4";
+  var FILM_SRC = "assets/hero-film.mp4";
   var filmDuration = 0;
   var targetTime = 0;
   var smoothTime = 0;
