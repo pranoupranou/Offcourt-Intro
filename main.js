@@ -199,13 +199,36 @@
   });
 
   if (video) {
-    video.addEventListener("seeked", function () {});
+    /* hero-film.mp4 measured at ~47 native fps (237 frames / ~5.04s).
+       Stepping in 5-frame increments — rather than seeking on every
+       ~0.02s of drift — cuts the number of decoder seeks by 5x, which
+       is the actual cost of scrubbing; the eye reads it as smooth
+       motion either way. */
+    var FILM_FPS = 47;
+    var FRAME_STEP = 5;
+    var seekEps = FRAME_STEP / FILM_FPS;
+
+    /* seek-gated scrub: never queue a second seek while one is in flight.
+       The lerp keeps motion continuous; the gate lets each device run at
+       exactly the seek rate it can sustain — no pile-ups, no jitter. This
+       is what the un-gated version was missing, and the real source of
+       the lag: overlapping seek requests backing up the decoder. */
+    var seekPending = false;
+    var seekIssuedAt = 0;
+
+    video.addEventListener("seeked", function () { seekPending = false; });
+
     gsap.ticker.add(function () {
       if (!filmDuration || video.readyState < 2) return;
       smoothTime += (targetTime - smoothTime) * 0.12;
+      var now = performance.now();
+      if (seekPending && now - seekIssuedAt < 600) return;
       var diff = Math.abs(smoothTime - video.currentTime);
-      var seekEps = isTouch ? 0.04 : 0.02;
-      if (diff > seekEps) video.currentTime = smoothTime;
+      if (diff > seekEps) {
+        seekPending = true;
+        seekIssuedAt = now;
+        video.currentTime = smoothTime;
+      }
     });
   }
 
