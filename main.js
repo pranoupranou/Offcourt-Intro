@@ -200,12 +200,11 @@
 
   if (video) {
     /* hero-film.mp4 measured at ~47 native fps (237 frames / ~5.04s).
-       Stepping in 5-frame increments — rather than seeking on every
-       ~0.02s of drift — cuts the number of decoder seeks by 5x, which
-       is the actual cost of scrubbing; the eye reads it as smooth
-       motion either way. */
+       Stepping in 2-frame increments — rather than seeking on every
+       ~0.02s of drift — still halves the number of decoder seeks vs.
+       a per-frame seek, while keeping motion visibly smooth. */
     var FILM_FPS = 47;
-    var FRAME_STEP = 5;
+    var FRAME_STEP = 2;
     var seekEps = FRAME_STEP / FILM_FPS;
 
     /* seek-gated scrub: never queue a second seek while one is in flight.
