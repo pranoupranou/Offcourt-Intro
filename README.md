@@ -1,4 +1,4 @@
-# OFF COURT — Carousel Edition
+# OFF COURT — Main 
 
 A three-chapter landing page for Off Court Social Club, launching in North
 Bangalore. The hero is a swipeable four-image carousel showcasing Community,
@@ -7,9 +7,7 @@ membership sign-up.
 
 ## Chapters
 
-1. **Hero carousel** — four full-bleed photos with per-slide captions,
-   dot navigation, swipe support, and gentle autoplay that stops the moment
-   a visitor takes control (dot click or swipe).
+1. **Hero scroll** — full-bleed scroll that navigates the venue.
 2. **Enroll** — founding membership sign-up (Name / Email / Phone), horizontal
    fields on desktop, stacked on mobile. Quiet success state on submit.
 3. **Footer** — minimal.
