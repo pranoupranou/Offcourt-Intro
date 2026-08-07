@@ -200,12 +200,12 @@
 
   if (video) {
     /* hero-film.mp4 is the 4K upscale of the original (non-interpolated)
-       footage, native 24fps (117 frames / ~5.09s). Stepping in 5-frame
+       footage, native 24fps (117 frames / ~5.09s). Stepping in 4-frame
        increments — rather than seeking on every ~0.02s of drift — cuts
-       decoder seeks roughly 5x vs. a per-frame seek, while keeping
+       decoder seeks roughly 4x vs. a per-frame seek, while keeping
        motion visibly smooth. */
     var FILM_FPS = 24;
-    var FRAME_STEP = 5;
+    var FRAME_STEP = 4;
     var seekEps = FRAME_STEP / FILM_FPS;
 
     /* seek-gated scrub: never queue a second seek while one is in flight.
