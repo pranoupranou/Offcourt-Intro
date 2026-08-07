@@ -82,7 +82,9 @@
      while the hero is pinned ============ */
 
   var video = document.getElementById("film");
+  var filmCanvas = document.getElementById("filmCanvas");
   var FILM_SRC = "assets/hero-film.mp4";
+  var FILM_FPS = 48; /* hero-film.mp4 is the 4K, 48fps upscale (237 frames / ~5.09s) */
   var filmDuration = 0;
   var targetTime = 0;
   var smoothTime = 0;
@@ -92,8 +94,236 @@
   /* hidden clone of the film, used only to scan nearby frames for
      sharpness once scrolling settles - never rendered, so the scan
      itself is invisible; only the final, sharper frame ever shows up
-     on the real <video>. */
+     on the real <video>. This is also the fallback rendering path if
+     the WebCodecs cache below never becomes available. */
   var scanVideo = null;
+
+  /* ============ WebCodecs frame cache (progressive enhancement) ============
+     The <video>+seek scrub above always works and is the baseline. In
+     parallel, if the browser supports WebCodecs, every native frame of
+     the film is decoded once, downsampled to a JPEG in memory, and
+     cached. Once that finishes, playback swaps from seeking a <video>
+     element (which costs a real decoder seek every time) to just
+     drawing an already-decoded frame onto a canvas - an instant lookup
+     with no seek cost at all, so scrubbing can show every frame with
+     no stepping/gating tradeoff. If WebCodecs or the mp4box.js demuxer
+     aren't available, this whole section quietly no-ops and the
+     <video> path keeps running indefinitely - no user-facing failure
+     mode either way. */
+  var useCanvas = false;
+  var frameCache = [];
+  var frameCacheReady = false;
+  var bitmapLRU = new Map();
+  var LRU_MAX = 8;
+  var filmCtx = filmCanvas ? filmCanvas.getContext("2d") : null;
+  var drawingIdx = null;
+  var pendingDrawIdx = null;
+  /* set once the scroll-scrub setup below (only reached when motion
+     isn't reduced) is ready; lets swapToCanvas trigger a sharpness
+     refine on the very first canvas frame without reaching across a
+     strict-mode block scope it isn't part of */
+  var triggerInitialCanvasRefine = null;
+
+  function resizeFilmCanvas() {
+    if (!filmCanvas) return;
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var rect = filmCanvas.getBoundingClientRect();
+    var w = Math.max(1, Math.round(rect.width * dpr));
+    var h = Math.max(1, Math.round(rect.height * dpr));
+    if (filmCanvas.width !== w || filmCanvas.height !== h) {
+      filmCanvas.width = w;
+      filmCanvas.height = h;
+      if (drawingIdx !== null) redrawCurrent();
+    }
+  }
+
+  function drawCover(bitmap) {
+    if (!filmCtx || !filmCanvas.width || !filmCanvas.height) return;
+    var cw = filmCanvas.width, ch = filmCanvas.height;
+    var iw = bitmap.width, ih = bitmap.height;
+    var scale = Math.max(cw / iw, ch / ih);
+    var sw = cw / scale, sh = ch / scale;
+    var sx = (iw - sw) / 2, sy = (ih - sh) / 2;
+    filmCtx.drawImage(bitmap, sx, sy, sw, sh, 0, 0, cw, ch);
+  }
+
+  function redrawCurrent() {
+    if (drawingIdx === null) return;
+    getBitmap(drawingIdx).then(function (bmp) { if (bmp) drawCover(bmp); });
+  }
+
+  function getBitmap(index) {
+    if (bitmapLRU.has(index)) {
+      var bmp = bitmapLRU.get(index);
+      bitmapLRU.delete(index);
+      bitmapLRU.set(index, bmp);
+      return Promise.resolve(bmp);
+    }
+    var entry = frameCache[index];
+    if (!entry) return Promise.resolve(null);
+    return createImageBitmap(entry.blob).then(function (bmp) {
+      bitmapLRU.set(index, bmp);
+      if (bitmapLRU.size > LRU_MAX) {
+        var oldestKey = bitmapLRU.keys().next().value;
+        var oldestBmp = bitmapLRU.get(oldestKey);
+        bitmapLRU.delete(oldestKey);
+        oldestBmp.close();
+      }
+      return bmp;
+    });
+  }
+
+  /* collapses to whichever frame index was most recently requested -
+     if several scroll ticks fire while a decode is still in flight,
+     only the latest one gets drawn once ready, nothing piles up */
+  function requestDraw(index) {
+    if (index === drawingIdx) return;
+    if (pendingDrawIdx !== null) { pendingDrawIdx = index; return; }
+    pendingDrawIdx = index;
+    step();
+    function step() {
+      var idx = pendingDrawIdx;
+      getBitmap(idx).then(function (bmp) {
+        if (bmp) { drawCover(bmp); drawingIdx = idx; }
+        if (pendingDrawIdx !== idx) { step(); /* a newer frame was requested mid-decode */ }
+        else { pendingDrawIdx = null; }
+      });
+    }
+  }
+
+  function buildWebCodecsCache(arrayBuffer) {
+    /* reduced-motion skips the scrub entirely - decoding the whole
+       film into memory would be pure waste for those visitors */
+    if (reduced) return;
+    if (typeof VideoDecoder === "undefined" || typeof MP4Box === "undefined" || !filmCanvas) return;
+
+    function getDescription(trak) {
+      var entries = trak.mdia.minf.stbl.stsd.entries;
+      for (var i = 0; i < entries.length; i++) {
+        var box = entries[i].avcC || entries[i].hvcC || entries[i].vpcC || entries[i].av1C;
+        if (box) {
+          var stream = new DataStream(undefined, 0, DataStream.BIG_ENDIAN);
+          box.write(stream);
+          return new Uint8Array(stream.buffer, 8);
+        }
+      }
+      return undefined;
+    }
+
+    var workCanvas = null, workCtx = null;
+    var frameQueue = [];
+    var processingQueue = false;
+    var decodeFinished = false;
+    var framesExpected = 0;
+    var framesWritten = 0;
+
+    window.__heroFilm = {
+      status: "starting",
+      framesWritten: function () { return framesWritten; },
+      framesExpected: function () { return framesExpected; },
+      useCanvas: function () { return useCanvas; }
+    };
+
+    function pump() {
+      if (processingQueue) return;
+      var frame = frameQueue.shift();
+      if (!frame) { checkComplete(); return; }
+      processingQueue = true;
+      if (!workCanvas) {
+        workCanvas = document.createElement("canvas");
+        workCanvas.width = frame.displayWidth;
+        workCanvas.height = frame.displayHeight;
+        workCtx = workCanvas.getContext("2d");
+      }
+      workCtx.drawImage(frame, 0, 0, workCanvas.width, workCanvas.height);
+      var ts = frame.timestamp / 1e6;
+      frame.close();
+      workCanvas.toBlob(function (blob) {
+        if (blob) {
+          var idx = Math.round(ts * FILM_FPS);
+          frameCache[idx] = { t: ts, blob: blob };
+        }
+        framesWritten++;
+        processingQueue = false;
+        pump();
+      }, "image/jpeg", 0.9);
+    }
+
+    function checkComplete() {
+      if (decodeFinished && frameQueue.length === 0 && !processingQueue) {
+        frameCacheReady = true;
+        window.__heroFilm.status = "complete";
+        swapToCanvas();
+      }
+    }
+
+    var decoder = new VideoDecoder({
+      output: function (frame) { frameQueue.push(frame); pump(); },
+      error: function () { /* WebCodecs failed mid-stream - just stay on the <video> path */ }
+    });
+
+    var mp4boxfile = MP4Box.createFile();
+    mp4boxfile.onError = function (e) { window.__heroFilm.status = "mp4box-error: " + e; };
+    mp4boxfile.onReady = function (info) {
+      var track = info.videoTracks[0];
+      if (!track) { window.__heroFilm.status = "no-video-track"; return; }
+      framesExpected = track.nb_samples;
+      window.__heroFilm.status = "configuring (" + track.codec + ")";
+      var trak = mp4boxfile.getTrackById(track.id);
+      var description = getDescription(trak);
+      try {
+        decoder.configure({
+          codec: track.codec,
+          codedWidth: track.video.width,
+          codedHeight: track.video.height,
+          description: description
+        });
+      } catch (e) { window.__heroFilm.status = "configure-failed: " + e; return; }
+      window.__heroFilm.status = "decoding";
+      mp4boxfile.setExtractionOptions(track.id, null, { nbSamples: 100 });
+      mp4boxfile.start();
+    };
+    mp4boxfile.onSamples = function (trackId, ref, samples) {
+      samples.forEach(function (sample) {
+        decoder.decode(new EncodedVideoChunk({
+          type: sample.is_sync ? "key" : "delta",
+          timestamp: (sample.cts * 1e6) / sample.timescale,
+          duration: (sample.duration * 1e6) / sample.timescale,
+          data: sample.data
+        }));
+      });
+    };
+
+    try {
+      arrayBuffer.fileStart = 0;
+      mp4boxfile.appendBuffer(arrayBuffer);
+      mp4boxfile.flush();
+      decoder.flush().then(function () {
+        decodeFinished = true;
+        checkComplete();
+      }).catch(function (e) { window.__heroFilm.status = "decoder-flush-failed: " + e; });
+    } catch (e) { window.__heroFilm.status = "demux-failed: " + e; }
+  }
+
+  function swapToCanvas() {
+    if (useCanvas || !filmCanvas) return;
+    useCanvas = true;
+    resizeFilmCanvas();
+    var idx = Math.max(0, Math.min(frameCache.length - 1, Math.round(smoothTime * FILM_FPS)));
+    requestDraw(idx);
+    if (triggerInitialCanvasRefine) triggerInitialCanvasRefine();
+    if (typeof gsap !== "undefined") {
+      gsap.to(filmCanvas, { opacity: 1, duration: 0.5, ease: "power1.out" });
+      gsap.to(video, { opacity: 0, duration: 0.5, ease: "power1.out" });
+    } else {
+      filmCanvas.style.opacity = 1;
+      video.style.opacity = 0;
+    }
+  }
+
+  window.addEventListener("resize", function () {
+    if (useCanvas) resizeFilmCanvas();
+  });
 
   if (video) {
     scanVideo = document.createElement("video");
@@ -112,6 +342,7 @@
         video.load();
         scanVideo.src = url;
         scanVideo.load();
+        blob.arrayBuffer().then(buildWebCodecsCache).catch(function () {});
       })
       .catch(function () {
         video.src = FILM_SRC;
@@ -224,11 +455,11 @@
   });
 
   if (video) {
-    /* hero-film.mp4 is the 4K, 48fps upscale (237 frames / ~5.09s).
-       Stepping in 4-frame increments — rather than seeking on every
-       ~0.01s of drift — cuts decoder seeks roughly 4x vs. a per-frame
-       seek, while keeping motion visibly smooth. */
-    var FILM_FPS = 48;
+    /* Stepping the legacy <video> path in 4-frame increments — rather
+       than seeking on every ~0.01s of drift — cuts decoder seeks
+       roughly 4x vs. a per-frame seek, while keeping motion visibly
+       smooth. Irrelevant once useCanvas is true, since drawing an
+       already-decoded frame has no seek cost to economize on. */
     var FRAME_STEP = 4;
     var seekEps = FRAME_STEP / FILM_FPS;
 
@@ -243,8 +474,16 @@
     video.addEventListener("seeked", function () { seekPending = false; });
 
     gsap.ticker.add(function () {
-      if (!filmDuration || video.readyState < 2) return;
+      if (!filmDuration) return;
       smoothTime += (targetTime - smoothTime) * 0.12;
+
+      if (useCanvas) {
+        var idx = Math.max(0, Math.min(frameCache.length - 1, Math.round(smoothTime * FILM_FPS)));
+        requestDraw(idx);
+        return;
+      }
+
+      if (video.readyState < 2) return;
       var now = performance.now();
       if (seekPending && now - seekIssuedAt < 600) return;
       var diff = Math.abs(smoothTime - video.currentTime);
@@ -312,7 +551,39 @@
 
     var settleToken = 0;
 
+    /* same idea as the <video> path below, but the cache makes it
+       trivial: every candidate frame is already decoded, so scoring
+       them is just a handful of instant lookups - no seeking at all. */
+    function refineRestingFrameCanvas(centerTime) {
+      var myToken = settleToken;
+      var centerIdx = Math.round(centerTime * FILM_FPS);
+      var maxIdx = frameCache.length - 1;
+      var candidates = [-2, -1, 0, 1, 2]
+        .map(function (k) { return centerIdx + k; })
+        .filter(function (idx) { return idx >= 0 && idx <= maxIdx && frameCache[idx]; });
+      if (!candidates.length) return;
+
+      Promise.all(candidates.map(function (idx) {
+        return getBitmap(idx).then(function (bmp) { return { idx: idx, bmp: bmp }; });
+      })).then(function (loaded) {
+        if (myToken !== settleToken) return;
+        var best = null;
+        loaded.forEach(function (item) {
+          if (!item.bmp) return;
+          var score = sharpnessOf(item.bmp);
+          if (!best || score > best.score) best = { idx: item.idx, score: score };
+        });
+        if (!best || best.idx === drawingIdx) return;
+        targetTime = best.idx / FILM_FPS;
+        smoothTime = targetTime;
+        requestDraw(best.idx);
+      });
+    }
+
+    triggerInitialCanvasRefine = function () { refineRestingFrameCanvas(smoothTime); };
+
     function refineRestingFrame(centerTime) {
+      if (useCanvas) { refineRestingFrameCanvas(centerTime); return; }
       if (!scanVideo || !filmDuration || scanVideo.readyState < 2) return;
       var myToken = settleToken;
       var maxT = filmDuration - 0.05;

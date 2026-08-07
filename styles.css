@@ -199,6 +199,19 @@ h2 em, .ob-welcome em {
   transform: translateZ(0);
 }
 
+/* WebCodecs render target — drawn manually (canvas has no object-fit),
+   swapped in over the <video> once every frame is pre-decoded and
+   cached; opacity is managed entirely from JS. */
+.film-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
 .hero-scrim {
   position: absolute;
   inset: 0;
