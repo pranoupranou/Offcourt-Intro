@@ -89,11 +89,36 @@
   var firstFrameShown = false;
   var isTouch = window.matchMedia("(pointer: coarse)").matches;
 
+  /* hidden clone of the film, used only to scan nearby frames for
+     sharpness once scrolling settles - never rendered, so the scan
+     itself is invisible; only the final, sharper frame ever shows up
+     on the real <video>. */
+  var scanVideo = null;
+
   if (video) {
+    scanVideo = document.createElement("video");
+    scanVideo.muted = true;
+    scanVideo.playsInline = true;
+    scanVideo.preload = "auto";
+    scanVideo.setAttribute("aria-hidden", "true");
+    scanVideo.style.cssText = "position:fixed;left:-9999px;top:-9999px;width:2px;height:2px;opacity:0;pointer-events:none;";
+    document.body.appendChild(scanVideo);
+
     fetch(FILM_SRC)
       .then(function (r) { return r.ok ? r.blob() : Promise.reject(new Error(r.status)); })
-      .then(function (blob) { video.src = URL.createObjectURL(blob); video.load(); })
-      .catch(function () { video.src = FILM_SRC; video.load(); });
+      .then(function (blob) {
+        var url = URL.createObjectURL(blob);
+        video.src = url;
+        video.load();
+        scanVideo.src = url;
+        scanVideo.load();
+      })
+      .catch(function () {
+        video.src = FILM_SRC;
+        video.load();
+        scanVideo.src = FILM_SRC;
+        scanVideo.load();
+      });
 
     video.addEventListener("loadedmetadata", function () {
       if (video.duration && isFinite(video.duration)) {
@@ -229,6 +254,125 @@
         video.currentTime = smoothTime;
       }
     });
+
+    /* ============ sharpest-frame snap, at rest ============
+       Real footage carries per-frame motion blur wherever the camera
+       is moving, so whichever exact instant the scrub lands on can be
+       one of those blurry frames. Once scrolling actually stops, scan
+       the handful of native frames right around the resting point on
+       the hidden clone and snap to whichever is sharpest - nothing
+       flickers on the visible video, only the final corrected frame
+       ever shows. */
+    var frameDuration = 1 / FILM_FPS;
+
+    var scanCanvas = document.createElement("canvas");
+    scanCanvas.width = 160;
+    scanCanvas.height = 90;
+    var scanCtx = scanCanvas.getContext("2d", { willReadFrequently: true });
+
+    function seekAndWait(el, t) {
+      return new Promise(function (resolve) {
+        var done = false;
+        function finish() {
+          if (done) return;
+          done = true;
+          el.removeEventListener("seeked", finish);
+          resolve();
+        }
+        el.addEventListener("seeked", finish);
+        el.currentTime = t;
+        setTimeout(finish, 800); /* safety net if a no-op seek never fires 'seeked' */
+      });
+    }
+
+    function sharpnessOf(el) {
+      scanCtx.drawImage(el, 0, 0, scanCanvas.width, scanCanvas.height);
+      var data;
+      try {
+        data = scanCtx.getImageData(0, 0, scanCanvas.width, scanCanvas.height).data;
+      } catch (e) {
+        return 0;
+      }
+      var w = scanCanvas.width, h = scanCanvas.height;
+      var gray = new Float32Array(w * h);
+      for (var i = 0, p = 0; i < data.length; i += 4, p++) {
+        gray[p] = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
+      }
+      var energy = 0;
+      for (var y = 0; y < h - 1; y++) {
+        for (var x = 0; x < w - 1; x++) {
+          var idx = y * w + x;
+          var dx = gray[idx] - gray[idx + 1];
+          var dy = gray[idx] - gray[idx + w];
+          energy += dx * dx + dy * dy;
+        }
+      }
+      return energy;
+    }
+
+    var settleToken = 0;
+
+    function refineRestingFrame(centerTime) {
+      if (!scanVideo || !filmDuration || scanVideo.readyState < 2) return;
+      var myToken = settleToken;
+      var maxT = filmDuration - 0.05;
+      var candidates = [-2, -1, 0, 1, 2]
+        .map(function (k) { return centerTime + k * frameDuration; })
+        .filter(function (t) { return t >= 0 && t <= maxT; });
+
+      var results = [];
+      var chain = Promise.resolve();
+      candidates.forEach(function (t) {
+        chain = chain.then(function () {
+          if (myToken !== settleToken) return;
+          return seekAndWait(scanVideo, t).then(function () {
+            if (myToken !== settleToken) return;
+            results.push({ t: t, score: sharpnessOf(scanVideo) });
+          });
+        });
+      });
+      chain.then(function () {
+        if (myToken !== settleToken || !results.length) return;
+        var best = results[0];
+        for (var i = 1; i < results.length; i++) {
+          if (results[i].score > best.score) best = results[i];
+        }
+        if (Math.abs(best.t - video.currentTime) < frameDuration * 0.5) return;
+        targetTime = best.t;
+        smoothTime = best.t;
+        seekPending = true;
+        seekIssuedAt = performance.now();
+        video.currentTime = best.t;
+      });
+    }
+
+    var idleTimer = null;
+    function scheduleRefine() {
+      settleToken++;
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(function () {
+        var myToken = settleToken;
+        var waited = 0;
+        var wait = setInterval(function () {
+          waited += 60;
+          if (myToken !== settleToken || waited > 1500) { clearInterval(wait); return; }
+          if (Math.abs(smoothTime - targetTime) < seekEps) {
+            clearInterval(wait);
+            refineRestingFrame(targetTime);
+          }
+        }, 60);
+      }, 220);
+    }
+
+    window.addEventListener("scroll", scheduleRefine, { passive: true });
+    window.addEventListener("wheel", scheduleRefine, { passive: true });
+    window.addEventListener("touchmove", scheduleRefine, { passive: true });
+
+    /* also fix the very first resting frame (top of page, before any
+       scrolling), in case the film opens on a moving-camera moment */
+    scanVideo.addEventListener("loadeddata", function () {
+      setTimeout(function () { refineRestingFrame(targetTime); }, 1000);
+    }, { once: true });
   }
 
   /* ============ ticker ============ */
