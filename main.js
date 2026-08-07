@@ -184,7 +184,7 @@
     function step() {
       var idx = pendingDrawIdx;
       getBitmap(idx).then(function (bmp) {
-        if (bmp) { drawCover(bmp); drawingIdx = idx; }
+        if (bmp) { drawCover(bmp); drawingIdx = idx; if (window.__heroFilm) window.__heroFilm.lastDrawAt = performance.now(); }
         if (pendingDrawIdx !== idx) { step(); /* a newer frame was requested mid-decode */ }
         else { pendingDrawIdx = null; }
       });
@@ -221,7 +221,9 @@
       status: "starting",
       framesWritten: function () { return framesWritten; },
       framesExpected: function () { return framesExpected; },
-      useCanvas: function () { return useCanvas; }
+      useCanvas: function () { return useCanvas; },
+      drawingIdx: function () { return drawingIdx; },
+      lastDrawAt: 0
     };
 
     function pump() {
@@ -442,7 +444,7 @@
     start: "top top",
     end: "+=400%",
     pin: true,
-    scrub: 1,
+    scrub: 0.4,
     anticipatePin: 1,
     onUpdate: function (self) {
       if (video) {
@@ -475,14 +477,25 @@
 
     gsap.ticker.add(function () {
       if (!filmDuration) return;
-      smoothTime += (targetTime - smoothTime) * 0.12;
 
       if (useCanvas) {
-        var idx = Math.max(0, Math.min(frameCache.length - 1, Math.round(smoothTime * FILM_FPS)));
+        /* GSAP's own scrub already smooths the raw scroll input; drawing
+           an already-decoded frame is free, so there's nothing left to
+           protect by adding a second layer of lag on top. Map straight
+           from targetTime with no extra lerp - this is what "buttery"
+           actually needs once seek cost is gone. smoothTime is kept in
+           sync purely so the sharpness-refine code below can keep using
+           it as a single source of truth for "current position". */
+        smoothTime = targetTime;
+        var idx = Math.max(0, Math.min(frameCache.length - 1, Math.round(targetTime * FILM_FPS)));
         requestDraw(idx);
         return;
       }
 
+      /* legacy <video> path only: the lerp here exists purely to keep
+         seek requests from arriving faster than the decoder can honor
+         them - still needed as long as we're actually seeking. */
+      smoothTime += (targetTime - smoothTime) * 0.12;
       if (video.readyState < 2) return;
       var now = performance.now();
       if (seekPending && now - seekIssuedAt < 600) return;
