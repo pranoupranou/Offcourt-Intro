@@ -84,7 +84,7 @@
   var video = document.getElementById("film");
   var filmCanvas = document.getElementById("filmCanvas");
   var FILM_SRC = "assets/hero-film.mp4";
-  var FILM_FPS = 48; /* hero-film.mp4 is the 4K, 48fps upscale (237 frames / ~5.09s) */
+  var FILM_FPS = 24; /* hero-film.mp4 is the original 1080p/24fps source (117 frames / ~5.09s) */
   var filmDuration = 0;
   var targetTime = 0;
   var smoothTime = 0;
