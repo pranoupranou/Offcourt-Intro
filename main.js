@@ -200,11 +200,11 @@
 
   if (video) {
     /* hero-film.mp4 measured at ~47 native fps (237 frames / ~5.04s).
-       Stepping in 2-frame increments — rather than seeking on every
-       ~0.02s of drift — still halves the number of decoder seeks vs.
-       a per-frame seek, while keeping motion visibly smooth. */
+       Stepping in 4-frame increments — rather than seeking on every
+       ~0.02s of drift — cuts decoder seeks roughly 4x vs. a per-frame
+       seek, while keeping motion visibly smooth. */
     var FILM_FPS = 47;
-    var FRAME_STEP = 2;
+    var FRAME_STEP = 4;
     var seekEps = FRAME_STEP / FILM_FPS;
 
     /* seek-gated scrub: never queue a second seek while one is in flight.
