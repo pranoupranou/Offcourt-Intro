@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Book — Off Court Social Club</title>
+<meta name="description" content="Book a court, a turf slot, an ice bath or a sauna at Off Court Social Club.">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="app.css">
+</head>
+<body class="app-body">
+
+<header class="app-nav">
+  <div class="app-nav-left">
+    <button class="app-back" id="backBtn" type="button" aria-label="Back">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <a class="app-nav-mark" href="index.html"><img src="assets/logo.png" alt="Off Court Social Club" width="331" height="104"></a>
+  </div>
+  <div class="app-nav-right">
+    <a class="app-profile" href="dashboard.html" id="navProfile" aria-label="Member dashboard">
+      <svg viewBox="0 0 24 24" fill="none" width="17" height="17"><circle cx="12" cy="8.5" r="3.4" stroke="currentColor" stroke-width="1.6"/><path d="M5 19c1.2-3.4 4-5 7-5s5.8 1.6 7 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </a>
+  </div>
+</header>
+
+<main class="wizard">
+
+  <div class="wizard-progress" id="wizardProgress"></div>
+
+  <!-- ============ 1 · MOOD ============ -->
+  <section class="step is-active" data-step="mood">
+    <p class="step-kicker">1. Choose Your Mood</p>
+    <h1 class="step-title">What's your vibe today?</h1>
+    <p class="step-sub">Every mood has a place here.</p>
+    <div class="mood-grid">
+      <button class="mood-tile is-primary" type="button" data-mood="play">
+        <span class="mood-icon">🎾</span>
+        <span class="mood-label">Play</span>
+        <span class="mood-desc">Hit the courts</span>
+      </button>
+      <button class="mood-tile" type="button" data-mood="recover">
+        <span class="mood-icon">🌿</span>
+        <span class="mood-label">Recover</span>
+        <span class="mood-desc">Recharge mind &amp; body</span>
+      </button>
+      <button class="mood-tile" type="button" disabled>
+        <span class="mood-icon">🥥</span>
+        <span class="mood-label">Social</span>
+        <span class="mood-desc">Eat, drink &amp; connect</span>
+      </button>
+      <button class="mood-tile" type="button" disabled>
+        <span class="mood-icon">🏆</span>
+        <span class="mood-label">Compete</span>
+        <span class="mood-desc">Bring your A-game</span>
+      </button>
+    </div>
+    <p class="empty-note">Social &amp; Compete — coming soon.</p>
+  </section>
+
+  <!-- ============ 2 · ZONE MAP (sport) ============ -->
+  <section class="step" data-step="zone">
+    <p class="step-kicker">2. Explore The Club</p>
+    <h1 class="step-title">Pick a zone to explore</h1>
+    <p class="step-sub">Tap any zone to continue.</p>
+    <div class="zone-map" id="zoneMap">
+      <div class="zone-map-grid" aria-hidden="true"></div>
+      <div class="zone-hint">Tap any zone to continue</div>
+    </div>
+  </section>
+
+  <!-- ============ 2b · WELLNESS PICK (recover) ============ -->
+  <section class="step" data-step="wellness-pick">
+    <p class="step-kicker">2. Recover</p>
+    <h1 class="step-title">Pick your reset</h1>
+    <p class="step-sub">Ice bath or sauna — 30 minutes, max.</p>
+    <div class="mood-grid" id="wellnessPick"></div>
+  </section>
+
+  <!-- ============ 3 · VENUE ============ -->
+  <section class="step" data-step="venue">
+    <p class="step-kicker">3. Select A Venue</p>
+    <h1 class="step-title">Feel the energy of the game</h1>
+    <div class="venue-card" id="venueCard"></div>
+  </section>
+
+  <!-- ============ 4 · TIME ============ -->
+  <section class="step" data-step="time">
+    <p class="step-kicker">4. Pick Your Time</p>
+    <h1 class="step-title">Drag to select your slot</h1>
+    <div class="date-strip" id="dateStrip"></div>
+    <div class="time-panel">
+      <p class="time-panel-label" id="durationRule">1 hour minimum · add 30 min slots</p>
+      <div class="time-track" id="timeTrack">
+        <div class="time-track-fill" id="timeTrackFill"></div>
+        <div class="time-track-handle" id="timeHandle"></div>
+      </div>
+      <div class="time-track-labels"><span>6 AM</span><span>12 PM</span><span>6 PM</span><span>12 AM</span></div>
+      <div class="time-readout">
+        <div class="range" id="timeRangeLabel">6:00 PM – 7:30 PM</div>
+        <div class="dur" id="timeDurLabel">1 hour 30 mins</div>
+      </div>
+      <div class="extend-row" id="extendRow">
+        <button class="extend-btn" type="button" data-extend="30">+ 30 mins</button>
+        <button class="extend-btn" type="button" data-extend="30">+ 30 mins</button>
+        <button class="extend-btn" type="button" data-extend="30">+ 30 mins</button>
+      </div>
+      <div class="looking-now" id="lookingNow"><span class="looking-dot"></span> <span id="lookingNowText">3 people are looking at this slot right now</span></div>
+    </div>
+  </section>
+
+  <!-- ============ 5 · MATCH ============ -->
+  <section class="step" data-step="match">
+    <p class="step-kicker">5. We'll Find You The Best Court</p>
+    <h1 class="step-title">You can change it if you want</h1>
+    <div id="matchWrap"></div>
+  </section>
+
+  <!-- ============ 6 · CREW ============ -->
+  <section class="step" data-step="crew">
+    <p class="step-kicker">6. Who's Coming?</p>
+    <h1 class="step-title">Invite your crew</h1>
+    <div class="court-wrap" id="courtWrap">
+      <div class="court-lines"></div>
+      <div class="court-net"></div>
+      <div class="player-slot" data-pos="1"><button class="player-avatar" type="button" data-slot="0">You</button><span class="player-name">You (Host)</span></div>
+      <div class="player-slot" data-pos="2"><button class="player-avatar" type="button" data-slot="1">+</button><span class="player-name">&nbsp;</span></div>
+      <div class="player-slot" data-pos="3"><button class="player-avatar" type="button" data-slot="2">+</button><span class="player-name">&nbsp;</span></div>
+      <div class="player-slot" data-pos="4"><button class="player-avatar" type="button" data-slot="3">+</button><span class="player-name">&nbsp;</span></div>
+    </div>
+
+    <div class="invite-tabs">
+      <button class="invite-tab is-active" type="button" data-invite-mode="link">Share A Link</button>
+      <button class="invite-tab" type="button" data-invite-mode="members">Invite Members</button>
+    </div>
+
+    <div class="invite-panel is-active" data-invite-panel="link">
+      <div class="invite-link-row">
+        <div class="invite-link-input" id="inviteLinkText">offcourt.club/join/xh92kd</div>
+        <button class="app-btn app-btn-ghost" style="width:auto; padding:0 16px;" id="copyLinkBtn" type="button">Copy</button>
+      </div>
+      <div class="share-row">
+        <a class="share-btn" id="whatsappShare" href="#" target="_blank" rel="noopener">WhatsApp</a>
+        <a class="share-btn" id="smsShare" href="#">SMS</a>
+      </div>
+    </div>
+
+    <div class="invite-panel" data-invite-panel="members">
+      <div class="member-pick-list" id="memberPickList"></div>
+    </div>
+  </section>
+
+  <!-- ============ 7 · EXTRAS ============ -->
+  <section class="step" data-step="extras">
+    <p class="step-kicker">7. Make It Better</p>
+    <h1 class="step-title">Add what you need</h1>
+    <div class="extras-list" id="extrasList"></div>
+  </section>
+
+  <!-- ============ 8 · REVIEW ============ -->
+  <section class="step" data-step="review">
+    <p class="step-kicker">8. Your Evening</p>
+    <h1 class="step-title">Review your plan</h1>
+    <div class="review-list" id="reviewList"></div>
+    <div class="total-bar">
+      <div>
+        <div class="total-label">Total Amount</div>
+      </div>
+      <div class="total-amount" id="totalAmount">₹0</div>
+    </div>
+  </section>
+
+  <!-- ============ 9 · CONFIRM ============ -->
+  <section class="step" data-step="confirm">
+    <div class="confirm-panel">
+      <div class="confirm-check">✓</div>
+      <h1 class="confirm-title">All set!</h1>
+      <p class="confirm-sub">Your court is reserved.</p>
+      <div class="booking-summary-card" id="confirmSummary"></div>
+      <div class="confirm-actions">
+        <button class="app-btn app-btn-ghost" type="button" id="addCalendarBtn">Add To Calendar</button>
+        <button class="app-btn app-btn-ghost" type="button" id="getDirectionsBtn">Get Directions</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 10 · INVITE SENT ============ -->
+  <section class="step" data-step="invite-sent">
+    <p class="step-kicker">10. Invites Sent &amp; Accepted</p>
+    <h1 class="step-title">The game is on</h1>
+    <div class="invite-sent-card" id="inviteSentCard"></div>
+    <div class="crew-list" id="crewList"></div>
+  </section>
+
+  <div class="step-actions" id="stepActions">
+    <button class="app-btn app-btn-ghost" type="button" id="prevBtn">Back</button>
+    <button class="app-btn app-btn-primary" type="button" id="nextBtn">Continue</button>
+  </div>
+
+</main>
+
+<script src="app-data.js"></script>
+<script src="book.js"></script>
+</body>
+</html>

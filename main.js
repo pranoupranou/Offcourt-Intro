@@ -7,6 +7,15 @@
 
   var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+  /* ============ member icon reflects mock sign-in state ============ */
+
+  (function () {
+    var navProfile = document.getElementById("navProfile");
+    if (!navProfile || typeof OC === "undefined") return;
+    var member = OC.getMember();
+    if (member && member.signedIn) navProfile.classList.add("is-signed-in");
+  })();
+
   /* ============ ticker — clone the item set until the track is always
      at least 2x the viewport wide, so the -50% loop never runs dry ============ */
 

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Events — Off Court Social Club</title>
+<meta name="description" content="Tournaments, socials and everything else happening at Off Court. Coming soon.">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="app.css">
+</head>
+<body class="app-body">
+
+<header class="app-nav">
+  <div class="app-nav-left">
+    <button class="app-back" id="backBtn" type="button" aria-label="Back">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <a class="app-nav-mark" href="index.html"><img src="assets/logo.png" alt="Off Court Social Club" width="331" height="104"></a>
+  </div>
+  <div class="app-nav-right">
+    <a class="app-profile" href="dashboard.html" id="navProfile" aria-label="Member dashboard">
+      <svg viewBox="0 0 24 24" fill="none" width="17" height="17"><circle cx="12" cy="8.5" r="3.4" stroke="currentColor" stroke-width="1.6"/><path d="M5 19c1.2-3.4 4-5 7-5s5.8 1.6 7 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </a>
+  </div>
+</header>
+
+<div class="simple-page">
+  <p class="simple-kicker">Tournaments · Socials · Workshops</p>
+  <h1 class="simple-title">Events, <em>coming soon.</em></h1>
+  <p class="simple-body">We're building out the calendar — from padel tournaments to community socials. Get on the list and we'll let you know the moment it's live.</p>
+  <a class="app-btn app-btn-primary" style="width:auto; padding:0 32px;" href="index.html#enroll">Join The List</a>
+</div>
+
+<script src="app-data.js"></script>
+<script>
+  document.getElementById("backBtn").addEventListener("click", function () { window.location.href = "index.html"; });
+  var navProfile = document.getElementById("navProfile");
+  if (navProfile && typeof OC !== "undefined") {
+    var m = OC.getMember();
+    if (m && m.signedIn) navProfile.classList.add("is-signed-in");
+  }
+</script>
+</body>
+</html>

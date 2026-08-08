@@ -313,6 +313,36 @@ h2 em, .ob-welcome em {
 }
 .nav-cta:hover { background: var(--chalk); color: var(--merlot); border-color: var(--chalk); letter-spacing: 0.18em; }
 
+.nav-link {
+  display: none;
+  color: var(--chalk-70);
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: color 0.4s ease;
+}
+.nav-link:hover { color: var(--chalk); }
+@media (min-width: 640px) { .nav-link { display: inline-block; } }
+
+.nav-profile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(34px, 6vw, 40px);
+  height: clamp(34px, 6vw, 40px);
+  flex: none;
+  color: var(--chalk);
+  border: 1px solid var(--chalk-45);
+  border-radius: 999px;
+  transition: background-color 0.5s ease, border-color 0.5s ease;
+}
+.nav-profile:hover { background: var(--chalk-10); border-color: var(--chalk-70); }
+.nav-profile svg { width: 17px; height: 17px; }
+.nav-profile.is-signed-in { background: var(--copper); border-color: var(--copper); color: var(--ink); }
+
 .hero-copy {
   position: absolute;
   inset: 0;

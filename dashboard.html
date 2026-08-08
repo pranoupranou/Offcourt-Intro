@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Member Dashboard — Off Court Social Club</title>
+<meta name="description" content="Your Off Court stats, upcoming games and history.">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="app.css">
+</head>
+<body class="app-body">
+
+<header class="app-nav">
+  <div class="app-nav-left">
+    <button class="app-back" id="backBtn" type="button" aria-label="Back">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <a class="app-nav-mark" href="index.html"><img src="assets/logo.png" alt="Off Court Social Club" width="331" height="104"></a>
+  </div>
+  <div class="app-nav-right">
+    <button class="app-btn app-btn-ghost" style="width:auto; padding:0 16px; min-height:38px;" id="signOutBtn" type="button">Sign Out</button>
+  </div>
+</header>
+
+<!-- ============ signed out ============ -->
+<div class="signin-panel" id="signinPanel">
+  <p class="step-kicker" style="text-align:center;">Member Dashboard</p>
+  <h1 class="step-title">Sign in to see your stats</h1>
+  <input type="text" id="nameInput" placeholder="Your name" autocomplete="name">
+  <button class="app-btn app-btn-primary" id="signInBtn" type="button">Sign In</button>
+</div>
+
+<!-- ============ signed in ============ -->
+<main class="dash-wrap" id="dashWrap" hidden>
+
+  <div class="dash-hero">
+    <div class="dash-avatar" id="dashAvatar"></div>
+    <div>
+      <div class="dash-name" id="dashName"></div>
+      <div class="dash-since">Member since 2026</div>
+    </div>
+  </div>
+
+  <div class="stats-grid" id="statsGrid"></div>
+
+  <div class="dash-tabs">
+    <button class="dash-tab is-active" type="button" data-tab="upcoming">Upcoming</button>
+    <button class="dash-tab" type="button" data-tab="past">Past</button>
+  </div>
+
+  <div class="dash-panel is-active" data-panel="upcoming" id="upcomingPanel"></div>
+  <div class="dash-panel" data-panel="past" id="pastPanel"></div>
+
+  <div style="margin-top:28px;">
+    <a class="app-btn app-btn-primary" href="book.html" style="display:flex;">Book Another Session</a>
+  </div>
+
+</main>
+
+<script src="app-data.js"></script>
+<script src="dashboard.js"></script>
+</body>
+</html>
